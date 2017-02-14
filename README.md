@@ -19,6 +19,7 @@ The sample app displays a list of GitHub public repositories for a given usernam
 * Mockito
 * Robolectric
 * RxBinding
+* Retrolambda
 
 ## Standard Android
 The `/app` directoy contains the implementation that follows the traditional standard Android approach. This is a couple of layout files, two Activities and the model. The model is exactly the same for the three implementations and it contains: `Repository`, `User` and a retrofit service (`GithubService`).
