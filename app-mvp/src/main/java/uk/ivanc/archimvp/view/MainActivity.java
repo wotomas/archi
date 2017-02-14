@@ -17,10 +17,15 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.jakewharton.rxbinding.view.RxView;
+
 import java.util.List;
 
+import rx.Observable;
+import uk.ivanc.archimvp.ArchiApplication;
 import uk.ivanc.archimvp.R;
 import uk.ivanc.archimvp.RepositoryAdapter;
+import uk.ivanc.archimvp.model.GithubService;
 import uk.ivanc.archimvp.model.Repository;
 import uk.ivanc.archimvp.presenter.MainPresenter;
 
@@ -39,8 +44,7 @@ public class MainActivity extends AppCompatActivity implements MainMvpView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //Set up presenter
-        presenter = new MainPresenter();
-        presenter.attachView(this);
+        presenter = new MainPresenter(((ArchiApplication)getApplication()).getGithubService());
 
         setContentView(R.layout.activity_main);
         progressBar = (ProgressBar) findViewById(R.id.progress);
@@ -53,26 +57,28 @@ public class MainActivity extends AppCompatActivity implements MainMvpView {
         setupRecyclerView(reposRecycleView);
         // Set up search button
         searchButton = (ImageButton) findViewById(R.id.button_search);
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                presenter.loadRepositories(editTextUsername.getText().toString());
-            }
-        });
+        //searchButton.setOnClickListener(new View.OnClickListener() {
+        //    @Override
+        //    public void onClick(View v) {
+        //        presenter.loadRepositories(editTextUsername.getText().toString());
+        //    }
+        //});
         //Set up username EditText
         editTextUsername = (EditText) findViewById(R.id.edit_text_username);
         editTextUsername.addTextChangedListener(mHideShowButtonTextWatcher);
-        editTextUsername.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    presenter.loadRepositories(editTextUsername.getText().toString());
-                    return true;
-                }
-                return false;
-            }
-        });
+        //editTextUsername.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        //    @Override
+        //    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        //        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+        //            presenter.loadRepositories(editTextUsername.getText().toString());
+        //            return true;
+        //        }
+        //        return false;
+        //    }
+        //});
     }
+
+
 
     // MainMvpView interface methods implementation
 
@@ -112,6 +118,22 @@ public class MainActivity extends AppCompatActivity implements MainMvpView {
         progressBar.setVisibility(View.VISIBLE);
         infoTextView.setVisibility(View.INVISIBLE);
         reposRecycleView.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        presenter.attachView(this);
+    }
+
+    @Override
+    public Observable<Void> onSearchButtonClicked() {
+        return RxView.clicks(searchButton);
+    }
+
+    @Override
+    public String getUsername() {
+        return editTextUsername.getText().toString().trim();
     }
 
     private void setupRecyclerView(RecyclerView recyclerView) {
